@@ -1,0 +1,151 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<MudStack Style="width: 100%">
+    <MudFileUpload T="IBrowserFile"
+                   @ref="@_fileUpload"
+                   OnFilesChanged="OnInputFileChanged"
+                   Hidden="@false"
+                   InputClass="cursor-pointer absolute mud-width-full mud-height-full overflow-hidden z-10"
+                   InputStyle="opacity:0"
+                   @ondrop="@ClearDragClass"
+                   @ondragenter="@SetDragClass"
+                   @ondragleave="@ClearDragClass"
+                   @ondragend="@ClearDragClass"
+                   Accept="@FileTypes.GetAccept()">
+        <SelectedTemplate>
+            <MudPaper Outlined="true"
+                      Class="@_dragClass">
+                @if (UploadModel.File == null)
+                {
+                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Style="height: 100%">
+                        <MudText Typo="Typo.h6">Перетащите файл или нажмите для выбора</MudText>
+                        <MudIcon Icon="@Icons.Material.Filled.FileUpload" Size="Size.Large" Color="Color.Primary" />
+                    </MudStack>
+                }
+                else
+                {
+                    <MudChip T="string"
+                             OnClose="ClearAsync"
+                             Color="Color.Dark"
+                             Text="@(UploadModel.File.Name + "  " + Math.Ceiling((double)UploadModel.File.Size / 1024) + "кб  " + currentProgress + "%")"
+                             Class="relative z-30" />
+                }
+            </MudPaper>
+        </SelectedTemplate>
+    </MudFileUpload>
+    <MudPaper Class="pa-2">
+        <MudGrid Spacing="3">
+            <MudItem xs="4">
+                @if (UploadModel.NewTable)
+                {
+                    <MudTextField T="string"
+                                  Label="Имя таблицы"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Mask="@(new RegexMask(RegexForNaming))"
+                                  @bind-Value="UploadModel.TableName"
+                                  Immediate />
+                }
+                else
+                {
+                    <MudSelect T="string"
+                               Label="Имя таблицы"
+                               Margin="Margin.Dense"
+                               AnchorOrigin="Origin.BottomCenter"
+                               Variant="Variant.Outlined"
+                               @bind-Value="UploadModel.TableName">
+                        <MudSelectItem T="string" Value="@("asd")" />
+                        <MudSelectItem T="string" Value="@("asd")" />
+                        <MudSelectItem T="string" Value="@("asd")" />
+                    </MudSelect>
+                }
+            </MudItem>
+            @if (UploadModel.FileType == FileTypes.FileType.CSV)
+            {
+                <MudItem xs="4">
+                    <MudTextField T="string"
+                                  Label="Разделитель значений"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  @bind-Value="UploadModel.CsvValueDivider"
+                                  TextChanged="async ()=>{await ParseExampleTable();}"
+                                  Immediate />
+                </MudItem>
+            }
+            <MudFlexBreak />
+            <MudItem xs="2">
+                <MudCheckBox T="bool"
+                             Label="Новая таблица"
+                             Color="Color.Primary"
+                             @bind-Value="UploadModel.NewTable" />
+            </MudItem>
+            <MudItem xs="2">
+                <MudCheckBox Label="Первая строка - заголовки"
+                             Color="Color.Primary"
+                             Value="UploadModel.FirstRowHeader"
+                             ValueChanged="async (bool v)=>{await FirstRowHeaderValueChanged(v);}" />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+    @if (UploadModel.ExampleTable != null)
+    {
+        <MudText Typo="Typo.h6">Предпросмотр:</MudText>
+        <MudPaper Style="position: relative;">
+            <MudOverlay Visible="loading" DarkBackground="true" Absolute="true">
+                <MudStack Class="d-flex align-center justify-center">
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                    <MudText Typo="Typo.h6">Подождите</MudText>
+                </MudStack>
+            </MudOverlay>
+            <MudSimpleTable Dense="true" Hover="true" Bordered="true">
+                <thead>
+                    <tr>
+                        @if (UploadModel.FirstRowHeader)
+                        {
+                            @foreach (DataColumn h in UploadModel.ExampleTable.Columns)
+                            {
+                                <th>@h.ColumnName</th>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (DataColumn h in UploadModel.ExampleTable.Columns)
+                            {
+                                <th>
+                                    <MudTextField Mask="@(new RegexMask(RegexForNaming))" Immediate Label="Имя" @bind-Value="h.ColumnName" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                </th>
+                            }
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (DataRow row in UploadModel.ExampleTable.Rows)
+                    {
+                        <tr>
+                            @foreach (var x in row.ItemArray)
+                            {
+                                <td>@x</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        </MudPaper>
+    }
+    <MudToolBar Gutters="@false"
+                Class="relative d-flex justify-end gap-4">
+        <MudButton Color="Color.Primary"
+                   Disabled="@(UploadModel.File == null)"
+                   OnClick="@Upload"
+                   Variant="Variant.Filled">
+            Загрузить
+        </MudButton>
+        <MudButton Color="Color.Error"
+                   OnClick="@ClearAsync"
+                   Variant="Variant.Filled">
+            Очистить
+        </MudButton>
+    </MudToolBar>
+</MudStack>
