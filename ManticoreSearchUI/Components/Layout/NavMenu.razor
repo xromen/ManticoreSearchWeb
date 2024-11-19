@@ -1,6 +1,16 @@
 ﻿
 <MudNavMenu>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+    <MudNavGroup Title="Таблицы" Icon="@Icons.Material.Outlined.TableChart">
+        @foreach (var table in Tables)
+        {
+            <MudNavGroup Title="@table.Name" Expanded="false">
+                <MudNavLink Href="@($"/DisplayTable")">Просмотреть</MudNavLink>
+                <MudNavLink OnClick="()=>DeleteTable(table)">Удалить</MudNavLink>
+            </MudNavGroup>
+        }
+        <MudNavLink Href="/counter" Icon="@Icons.Material.Filled.AddBox">Добавить</MudNavLink>
+    </MudNavGroup>
     <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
     <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Weather</MudNavLink>
 </MudNavMenu>

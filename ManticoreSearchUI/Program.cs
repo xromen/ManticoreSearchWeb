@@ -20,13 +20,10 @@ namespace ManticoreSearch.UI
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddScoped<ManticoreContext>();
+
             builder.Services.AddScoped<FilesService>();
             builder.Services.AddScoped<ManticoreService>();
-
-            builder.Services.AddScoped(x =>
-                new MySqlConnection("Server=localhost;port=9306;Connection Timeout=90000"));
-
-            builder.Services.AddScoped<ManticoreContext>();
 
             builder.Services.Configure<IISServerOptions>(options =>
             {

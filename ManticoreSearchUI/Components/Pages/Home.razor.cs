@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 using System.Data;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 
@@ -32,19 +33,12 @@ namespace ManticoreSearch.UI.Components.Pages
 
         private bool loading = false;
         private int? currentProgress = null;
-        private CancellationTokenSource? CancellationTokenSource { get; set; }
+        private CancellationTokenSource CancellationTokenSource { get; set; } = new();
 
         private UploadModel UploadModel { get; set; } = UploadModel.GetDefault();
 
         protected override async Task OnInitializedAsync()
         {
-            var tables = await ManticoreService.GetTablesAsync();
-
-            foreach(var table in tables)
-            {
-                Console.WriteLine(table.Name);
-            }
-
             await base.OnInitializedAsync();
         }
 
@@ -92,7 +86,7 @@ namespace ManticoreSearch.UI.Components.Pages
             }
             catch (OperationCanceledException)
             {
-                Snackbar.Add("Загрузка файла была отменена.", Severity.Info);
+                //Snackbar.Add("Загрузка файла была отменена.", Severity.Info);
             }
             catch (Exception ex)
             {
@@ -107,7 +101,9 @@ namespace ManticoreSearch.UI.Components.Pages
 
             loading = true;
 
-            UploadModel.ExampleTable = await FilesService.GetExampleTableAsync(UploadModel);
+            CancellationTokenSource = new CancellationTokenSource();
+
+            UploadModel.ExampleTable = await FilesService.GetExampleTableAsync(UploadModel, CancellationTokenSource.Token);
 
             loading = false;
 
@@ -146,11 +142,8 @@ namespace ManticoreSearch.UI.Components.Pages
 
         public void Dispose()
         {
-            if(CancellationTokenSource != null)
-            {
-                CancellationTokenSource.Cancel();
-                CancellationTokenSource.Dispose();
-            }
+            CancellationTokenSource.Cancel();
+            CancellationTokenSource.Dispose();
         }
 
         private void SetDragClass()

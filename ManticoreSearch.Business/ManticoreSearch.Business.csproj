@@ -16,4 +16,8 @@
     <ProjectReference Include="..\ManticoreSearch.Data\ManticoreSearch.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dynamic\" />
+  </ItemGroup>
+
 </Project>

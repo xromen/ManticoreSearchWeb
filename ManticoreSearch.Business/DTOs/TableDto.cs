@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ManticoreSearch.Business.Models;
 
 namespace ManticoreSearch.Business.DTOs
 {
@@ -10,5 +6,14 @@ namespace ManticoreSearch.Business.DTOs
     {
         public required string Index { get; set; }
         public required string Type { get; set; }
+
+        public Table ToModel(List<Column> columns)
+        {
+            return new Table()
+            {
+                Name = this.Index,
+                Columns = columns
+            };
+        }
     }
 }

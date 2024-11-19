@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ManticoreSearch.Business.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +13,14 @@ namespace ManticoreSearch.Business.DTOs
         public required string Field { get; set; }
         public required string Type { get; set; }
         public required string Property { get; set; }
+
+        public Column ToModel()
+        {
+            return new Column
+            {
+                Name = this.Field,
+                Type = this.Type
+            };
+        }
     }
 }
